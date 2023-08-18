@@ -4,6 +4,7 @@ fn main() {
     let mut app = App::new();
 
     app.register_fn(dummy_func());
+    app.register_fn(hello_func());
 
     println!("App: {:#?}", app);
 }
@@ -15,6 +16,18 @@ fn dummy_func() -> Func {
         },
         Event {
             name: "test/event".to_string(),
+            expression: None,
+        },
+    )
+}
+
+fn hello_func() -> Func {
+    create_function(
+        FuncOpts {
+            name: "hello".to_string(),
+        },
+        Event {
+            name: "test/hello".to_string(),
             expression: None,
         },
     )
