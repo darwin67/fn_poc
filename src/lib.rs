@@ -17,6 +17,11 @@ impl App {
     }
 }
 
+pub struct Input<T> {
+    pub event: T,
+    pub events: Vec<T>,
+}
+
 #[derive(Debug)]
 pub struct Func {
     pub opts: FuncOpts,
