@@ -1,15 +1,19 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 pub struct App {
-    funcs: Vec<Func>,
+    funcs: HashMap<String, Func>,
 }
 
 impl App {
     pub fn new() -> Self {
-        App { funcs: vec![] }
+        App {
+            funcs: HashMap::new(),
+        }
     }
 
     pub fn register_fn(&mut self, func: Func) {
-        self.funcs.push(func);
+        self.funcs.insert(func.slug(), func);
     }
 }
 
@@ -17,6 +21,12 @@ impl App {
 pub struct Func {
     pub opts: FuncOpts,
     pub trigger: Trigger,
+}
+
+impl Func {
+    pub fn slug(&self) -> String {
+        self.opts.name.clone()
+    }
 }
 
 #[derive(Debug)]
