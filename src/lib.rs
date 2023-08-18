@@ -1,45 +1,53 @@
 use std::collections::HashMap;
 
-#[derive(Debug)]
-pub struct App {
-    funcs: HashMap<String, Func>,
+use serde::{Deserialize, Serialize};
+
+pub struct App<T: Serialize + for<'a> Deserialize<'a>> {
+    funcs: HashMap<String, Box<Func<T>>>,
 }
 
-impl App {
+impl<T> App<T>
+where
+    T: Serialize + for<'a> Deserialize<'a>,
+{
     pub fn new() -> Self {
         App {
             funcs: HashMap::new(),
         }
     }
 
-    pub fn register_fn(&mut self, func: Func) {
-        self.funcs.insert(func.slug(), func);
+    pub fn register_fn(&mut self, func: Func<T>) {
+        self.funcs.insert(func.slug(), Box::new(func));
     }
 }
 
-pub struct Input<T> {
+pub struct Input<T: Serialize + for<'a> Deserialize<'a>> {
     pub event: T,
     pub events: Vec<T>,
 }
 
-#[derive(Debug)]
-pub struct Func {
+pub struct Func<T>
+where
+    T: Serialize + for<'a> Deserialize<'a>,
+{
     pub opts: FuncOpts,
     pub trigger: Trigger,
+    pub func: fn(Input<T>) -> Result<String, String>,
 }
 
-impl Func {
+impl<T> Func<T>
+where
+    T: Serialize + for<'a> Deserialize<'a>,
+{
     pub fn slug(&self) -> String {
         self.opts.name.clone()
     }
 }
 
-#[derive(Debug)]
 pub struct FuncOpts {
     pub name: String,
 }
 
-#[derive(Debug)]
 pub enum Trigger {
     Event {
         name: String,
@@ -50,6 +58,26 @@ pub enum Trigger {
     },
 }
 
-pub fn create_function(opts: FuncOpts, trigger: Trigger) -> Func {
-    return Func { opts, trigger };
+pub fn create_function<T>(
+    opts: FuncOpts,
+    trigger: Trigger,
+    func: fn(Input<T>) -> Result<String, String>,
+) -> Func<T>
+where
+    T: Serialize + for<'a> Deserialize<'a>,
+{
+    return Func {
+        opts,
+        trigger,
+        func,
+    };
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct Event<D, U> {
+    id: Option<String>,
+    name: String,
+    data: D,
+    user: Option<U>,
+    ts: Option<u64>,
 }
